@@ -288,6 +288,8 @@ class MyPlayerBrain(object):
     
     def allPickups (self, me, passengers):
             # pickup is a list of the possible passengers to pick up.
+            if self.me.limo.coffeeServings == 0:
+                return self.findClosestStore()
             pickup = [p for p in passengers if (not p in me.passengersDelivered and
                                                 p != me.limo.passenger and
                                                 p.car is None and
