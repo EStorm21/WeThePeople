@@ -280,4 +280,10 @@ class MyPlayerBrain(object):
             return pickup
 
     def calculateScore(self, passenger):
-        passenger.score = passenger.pointsDelivered
+        path = self.calculatePathPlus1(self.me, passenger.destination.busStop)
+        print "path score"
+        print self.scorePath(path)
+        passenger.score = passenger.pointsDelivered/float(self.scorePath(path))
+
+    def scorePath(self, path):
+        return len(path)
