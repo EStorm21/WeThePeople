@@ -12,7 +12,7 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "Eric Storm"
+NAME = "We, The People"
 SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
@@ -259,6 +259,7 @@ class MyPlayerBrain(object):
         return
     
     def allPickups (self, me, passengers):
+            # pickup is a list of the possible passengers to pick up.
             pickup = [p for p in passengers if (not p in me.passengersDelivered and
                                                 p != me.limo.passenger and
                                                 p.car is None and
