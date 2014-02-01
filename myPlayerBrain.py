@@ -12,8 +12,8 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "Guido van Rossum"
-SCHOOL = "Windward U."
+NAME = "Eric Storm"
+SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
     """The Python AI class.  This class must have the methods setup and gameStatus."""
@@ -68,6 +68,7 @@ class MyPlayerBrain(object):
 
         path = self.calculatePathPlus1(me, pickup[0].lobby.busStop)
         sendOrders(self, "ready", path, pickup)
+
 
     def gameStatus(self, status, playerStatus):
         """
@@ -262,5 +263,21 @@ class MyPlayerBrain(object):
                                                 p != me.limo.passenger and
                                                 p.car is None and
                                                 p.lobby is not None and p.destination is not None)]
+            total = 0
+            for passenger in pickup:
+                self.calculateScore(passenger)
+                total += passenger.score
+
             rand.shuffle(pickup)
+            select = rand.random()*total
+            for passenger in pickup:
+                total -= passenger.score
+                print "total"
+                print total
+                if (total <= 0):
+                    pickup.insert(0, pickup.pop(pickup.index(passenger)))
+                    break            
             return pickup
+
+    def calculateScore(self, passenger):
+        passenger.score = passenger.pointsDelivered
