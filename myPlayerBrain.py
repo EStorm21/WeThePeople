@@ -280,10 +280,13 @@ class MyPlayerBrain(object):
             return pickup
 
     def calculateScore(self, passenger):
-        path = self.calculatePathPlus1(self.me, passenger.destination.busStop)
+        pathScore = self.scorePath(simpleAStar.calculatePath(self.gameMap, self.me.limo.tilePosition, passenger.lobby.busStop))
+        pathScore += self.scorePath(simpleAStar.calculatePath(self.gameMap, passenger.lobby.busStop, passenger.destination.busStop))
         print "path score"
-        print self.scorePath(path)
-        passenger.score = passenger.pointsDelivered/float(self.scorePath(path))
+        print pathScore
+        passenger.score = passenger.pointsDelivered/float(pathScore)
+        if self.enemyAtDestination(passenger):
+            passenger.score = 0
 
     def scorePath(self, path):
         return len(path)
@@ -298,3 +301,10 @@ class MyPlayerBrain(object):
                 score = newScore
                 closestStore = x
         return closestStore
+
+    def enemyAtDestination(self, passenger):
+        destination = passenger.destination
+        for enemy in passenger.enemies:
+            if destination == enemy.lobby:
+                return True
+        return False
