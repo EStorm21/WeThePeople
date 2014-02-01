@@ -271,10 +271,10 @@ class MyPlayerBrain(object):
             rand.shuffle(pickup)
             select = rand.random()*total
             for passenger in pickup:
-                total -= passenger.score
+                select -= passenger.score
                 print "total"
                 print total
-                if (total <= 0):
+                if (select <= 0):
                     pickup.insert(0, pickup.pop(pickup.index(passenger)))
                     break            
             return pickup
