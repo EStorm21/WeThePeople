@@ -97,9 +97,12 @@ class MyPlayerBrain(object):
             if playerStatus != self.me:
                 if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
                   status == "PASSENGER_PICKED_UP"):
-                    print "Changing targets because someone else picked up ours"
+
                     if(playerStatus.limo.passenger == self.me.pickup[0]):
                         pickup = self.allPickups(self.me, self.passengers)
+                        print "Changing targets because someone else picked up ours"
+                        print "Now picking up"
+                        print pickup[0]
                         ptDest = pickup[0].lobby.busStop
                         self.displayOrders(ptDest)
             
@@ -139,6 +142,8 @@ class MyPlayerBrain(object):
                 if self.me.limo.passenger is None:
                     pickup = self.allPickups(self.me, self.passengers)
                     ptDest = pickup[0].lobby.busStop
+                    print "Now picking up"
+                    print pickup[0]
                 else:
                     ptDest = self.me.limo.passenger.destination.busStop
             elif (status == "PASSENGER_DELIVERED" or
