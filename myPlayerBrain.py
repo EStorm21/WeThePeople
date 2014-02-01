@@ -144,8 +144,8 @@ class MyPlayerBrain(object):
                 pickup = self.allPickups(self.me, self.passengers)
                 ptDest = pickup[0].lobby.busStop
             elif  status == "PASSENGER_REFUSED_ENEMY":
-                ptDest = rand.choice(filter(lambda c: c != self.me.limo.passenger.destination,
-                    self.companies)).busStop
+                pickup = self.allPickups(self.me, self.passengers)
+                ptDest = pickup[0].lobby.busStop
             elif (status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
                   status == "PASSENGER_PICKED_UP"):
                 pickup = self.allPickups(self.me, self.passengers)
@@ -289,7 +289,8 @@ class MyPlayerBrain(object):
             pickup = [p for p in passengers if (not p in me.passengersDelivered and
                                                 p != me.limo.passenger and
                                                 p.car is None and
-                                                p.lobby is not None and p.destination is not None)]
+                                                p.lobby is not None and p.destination is not None and
+                                                not any(i for i in p.enemies if i in p.destination.passengers))]
             total = 0
             for passenger in pickup:
                 self.calculateScore(passenger)
