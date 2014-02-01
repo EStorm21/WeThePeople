@@ -128,7 +128,7 @@ class MyPlayerBrain(object):
             # coffee store override
             if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or status == "PASSENGER_DELIVERED" or status == "PASSENGER_ABANDONED"):
                 if(self.me.limo.coffeeServings <= 0):
-                    ptDest = rand.choice(self.stores).busStop
+                    ptDest = self.findClosestStore().busStop
             elif(status == "PASSENGER_REFUSED_NO_COFFEE" or status == "PASSENGER_DELIVERED_AND_PICK_UP_REFUSED"):
                 ptDest = rand.choice(self.stores).busStop
             elif(status == "COFFEE_STORE_CAR_RESTOCKED"):
@@ -287,3 +287,14 @@ class MyPlayerBrain(object):
 
     def scorePath(self, path):
         return len(path)
+
+    def findClosestStore(self):
+        """Finds closest coffee store"""
+        closestStore = self.stores[0]
+        score = self.calculatePathPlus1(self.me, closestStore.busStop)
+        for x in self.stores:
+            newScore = self.calculatePathPlus1(self.me, x.busStop)
+            if newScore < score:
+                score = newScore
+                closestStore = x
+        return closestStore
