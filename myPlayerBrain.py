@@ -128,7 +128,7 @@ class MyPlayerBrain(object):
             # coffee store override
             if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or status == "PASSENGER_DELIVERED" or status == "PASSENGER_ABANDONED"):
                 if(self.me.limo.coffeeServings <= 0):
-                    ptDest = rand.choice(self.stores).busStop
+                    ptDest = self.findClosestStore().busStop
             elif(status == "PASSENGER_REFUSED_NO_COFFEE" or status == "PASSENGER_DELIVERED_AND_PICK_UP_REFUSED"):
                 ptDest = rand.choice(self.stores).busStop
             elif(status == "COFFEE_STORE_CAR_RESTOCKED"):
