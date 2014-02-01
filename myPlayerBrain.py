@@ -95,6 +95,17 @@ class MyPlayerBrain(object):
             # the Player you are updating (particularly to determine what tile
             # to start your path from).
             if playerStatus != self.me:
+                if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
+                  status == "PASSENGER_PICKED_UP")
+                    if(playerStatus.limo.passenger == self.me.pickup[0]):
+                        pickup = self.allPickups(self.me, self.passengers)
+                        ptDest = pickup[0].lobby.busStop
+                        self.displayOrders(ptDest)
+            
+                        # get the path from where we are to the dest.
+                        path = self.calculatePathPlus1(self.me, ptDest)
+
+                        sendOrders(self, "move", path, pickup)
                 return
 
             ptDest = None
@@ -102,10 +113,25 @@ class MyPlayerBrain(object):
             
             if status == "UPDATE":
                 self.maybePlayPowerUp()
+                if(self.me.limo.passenger): #if passenger in limo
+                    if(self.enemyAtDestination(self.me.limo.passenger)):
+                        pickup = self.allPickups(self.me, self.passengers)
+                        ptDest = pickup[0].lobby.busStop
+                        self.displayOrders(ptDest)
+            
+                        # get the path from where we are to the dest.
+                        path = self.calculatePathPlus1(self.me, ptDest)
+
+                        sendOrders(self, "move", path, pickup)
+                else: #no passenger in limo
+                    print "else"
+
                 return
             
             self.displayStatus(status, playerStatus)
             
+            print "status:"
+            print status
             
             if (status == "PASSENGER_NO_ACTION" or status == "NO_PATH"):
                 if self.me.limo.passenger is None:
@@ -309,3 +335,4 @@ class MyPlayerBrain(object):
             if destination == enemy.lobby:
                 return True
         return False
+
