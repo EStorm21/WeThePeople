@@ -96,7 +96,7 @@ class MyPlayerBrain(object):
             # to start your path from).
             if playerStatus != self.me:
                 if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
-                  status == "PASSENGER_PICKED_UP")
+                  status == "PASSENGER_PICKED_UP"):
                     if(playerStatus.limo.passenger == self.me.pickup[0]):
                         pickup = self.allPickups(self.me, self.passengers)
                         ptDest = pickup[0].lobby.busStop
