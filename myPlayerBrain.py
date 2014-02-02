@@ -59,6 +59,7 @@ class MyPlayerBrain(object):
         self.stores = stores
         self.powerUpDeck = powerUpDeck
         self.powerUpHand = []
+        self.powerUpHand2 = []
         self.myPassenger = None
         self.MAX_TRIPS_BEFORE_REFILL = 3
 
