@@ -12,11 +12,7 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-<<<<<<< HEAD
 NAME = "We, The People 3"
-=======
-NAME = "We, The People 3294872349"
->>>>>>> 129c0b7c1b2e9083b4aa53e7b0583877a6038d61
 SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
@@ -247,8 +243,9 @@ class MyPlayerBrain(object):
         playersWithoutPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is None, self.players)
         if (self.me.limo.passenger == None):
             for player in playersWithoutPassengers:
-                if (player.limo.path[-1] == self.me.limo.path[-1]):
-                    return player
+                if (player.limo.path != [] && self.me.limo.path != []):
+                    if (player.limo.path[-1] == self.me.limo.path[-1]):
+                        return player
         return None
 
     def maybePlayPowerUp(self):
@@ -301,6 +298,7 @@ class MyPlayerBrain(object):
                 # Stop best player if we have not found a race
                 else:
                     bestScore = 0
+                    bestPlayer = None
                     for player in self.players:
                         if player.totalScore > bestScore:
                             bestScore = player.totalScore
