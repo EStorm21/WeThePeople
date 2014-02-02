@@ -402,7 +402,7 @@ class MyPlayerBrain(object):
         score = self.calculatePathPlus1(self.me, closestStore.busStop)
         for x in self.stores:
             newScore = self.calculatePathPlus1(self.me, x.busStop)
-            if newScore < score:
+            if newScore > score:
                 score = newScore
                 closestStore = x
         return closestStore
