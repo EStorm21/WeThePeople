@@ -12,7 +12,7 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "We, The People"
+NAME = "We, The People 2"
 SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
@@ -163,7 +163,7 @@ class MyPlayerBrain(object):
                 if(self.me.limo.coffeeServings <= 0):
                     ptDest = self.findClosestStore().busStop
             elif(status == "PASSENGER_REFUSED_NO_COFFEE" or status == "PASSENGER_DELIVERED_AND_PICK_UP_REFUSED"):
-                ptDest = rand.choice(self.stores).busStop
+                ptDest = self.findClosestStore().busStop
             elif(status == "COFFEE_STORE_CAR_RESTOCKED"):
                 pickup = self.allPickups(self.me, self.passengers)
                 if len(pickup) != 0:
@@ -339,7 +339,7 @@ class MyPlayerBrain(object):
     def enemyAtDestination(self, passenger):
         destination = passenger.destination
         for enemy in passenger.enemies:
-            if destination == enemy.lobby:
+            if destination == enemy.lobby and destination:
                 return True
         return False
 
