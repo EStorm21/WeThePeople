@@ -12,7 +12,7 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "We, The People 2"
+NAME = "We, The People 3"
 SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
