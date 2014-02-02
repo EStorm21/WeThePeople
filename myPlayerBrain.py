@@ -129,7 +129,7 @@ class MyPlayerBrain(object):
 
                         sendOrders(self, "move", path, pickup)
                 else: #no passenger in limo
-                    print "else"
+                    print "No passenger in limo."
 
                 return
             
@@ -294,7 +294,8 @@ class MyPlayerBrain(object):
     def allPickups (self, me, passengers):
             # pickup is a list of the possible passengers to pick up.
             if self.me.limo.coffeeServings == 0:
-                return self.findClosestStore()
+                print "getting coffee"
+                return [self.findClosestStore()]
             pickup = [p for p in passengers if (not p in me.passengersDelivered and
                                                 p != me.limo.passenger and
                                                 p.car is None and
@@ -309,8 +310,6 @@ class MyPlayerBrain(object):
             select = rand.random()*total
             for passenger in pickup:
                 select -= passenger.score
-                print "total"
-                print total
                 if (select <= 0):
                     pickup.insert(0, pickup.pop(pickup.index(passenger)))
                     break            
@@ -319,8 +318,6 @@ class MyPlayerBrain(object):
     def calculateScore(self, passenger):
         pathScore = self.scorePath(simpleAStar.calculatePath(self.gameMap, self.me.limo.tilePosition, passenger.lobby.busStop))
         pathScore += self.scorePath(simpleAStar.calculatePath(self.gameMap, passenger.lobby.busStop, passenger.destination.busStop))
-        print "path score"
-        print pathScore
         passenger.score = passenger.pointsDelivered/float(pathScore)
         if self.enemyAtDestination(passenger):
             passenger.score = 0
