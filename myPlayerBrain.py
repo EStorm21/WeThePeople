@@ -12,7 +12,7 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "We, The People 0"
+NAME = "We, The People 3"
 SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
@@ -239,7 +239,7 @@ class MyPlayerBrain(object):
             path.append(path[-2])
         return path
     
-    def checkForRaces():
+    def checkForRaces(self):
         playersWithoutPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is None, self.players)
         if (self.me.limo.passenger == None):
             for player in playersWithoutPassengers:
@@ -289,7 +289,7 @@ class MyPlayerBrain(object):
             elif powerUp.card == "STOP_CAR":
                 # Check for races:
                 playersWithoutPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is None, self.players)
-                racingPlayer = checkForRaces()
+                racingPlayer = self.checkForRaces()
                 if racingPlayer != None:
                     powerUp.player = racingPlayer
                     print "stopping", racingPlayer, " their destination:", racingPlayer.limo.path[-1], "our dest", self.limo.path[-1]
