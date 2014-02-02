@@ -114,7 +114,7 @@ class MyPlayerBrain(object):
                         path = self.calculatePathPlus1(self.me, ptDest)
 
                         sendOrders(self, "move", path, pickup)
-                    else:
+                    elif (self.me.limo.coffeeServings <= 0):
                         print "Gotta get more coffee"
                         path = self.calculatePathPlus1(self.me, self.findClosestStore().busStop)
                         pickup = self.allPickups(self.me, self.passengers)
@@ -137,10 +137,10 @@ class MyPlayerBrain(object):
                         path = self.calculatePathPlus1(self.me, ptDest)
 
                         sendOrders(self, "move", path, pickup)
-                else: #no passenger in limo
+                elif (self.me.limo.coffeeServings <= 0): #no passenger in limo
                     print "No passenger in limo. Heading for "
                     print self.me.pickup[0]
-            else:
+            elif (self.me.limo.coffeeServings <= 0):
                 print "Gotta get more coffee"
                 path = self.calculatePathPlus1(self.me, self.findClosestStore().busStop)
                 pickup = self.allPickups(self.me, self.passengers)
