@@ -85,6 +85,9 @@ class MyPlayerBrain(object):
 
         """
 
+        if self.me.score < 0.5:
+            self.setOkToPlay()
+
         # bugbug - Framework.cs updates the object's in this object's Players,
         # Passengers, and Companies lists. This works fine as long as this app
         # is single threaded. However, if you create worker thread(s) or
