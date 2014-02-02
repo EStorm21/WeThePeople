@@ -12,7 +12,6 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-
 NAME = "EStorm"
 SCHOOL = "Harvey Mudd College"
 
