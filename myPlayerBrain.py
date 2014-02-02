@@ -85,6 +85,9 @@ class MyPlayerBrain(object):
 
         """
 
+        if self.me.score < 0.5:
+            self.setOkToPlay()
+
         # bugbug - Framework.cs updates the object's in this object's Players,
         # Passengers, and Companies lists. This works fine as long as this app
         # is single threaded. However, if you create worker thread(s) or
@@ -310,7 +313,7 @@ class MyPlayerBrain(object):
                     if  (10 > abs(player.limo.tilePosition[0] - player.limo.path[-1][0]) > 3) or (10 > abs(player.limo.tilePosition[1] - player.limo.path[-1][1]) > 3):
                         powerUp.player = player
                         playerPowerSend(self, "PLAY", powerUp)
-                        self.powerUpHand.remove(powerUp)
+                        self.powerUpHand2.remove(powerUp)
                         break
 
             else:
