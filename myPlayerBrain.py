@@ -136,6 +136,11 @@ class MyPlayerBrain(object):
                 else: #no passenger in limo
                     print "No passenger in limo. Heading for "
                     print self.me.pickup[0]
+            else:
+                print "Gotta get more coffee"
+                path = self.calculatePathPlus1(self.me, self.findClosestStore())
+                pickup = self.allPickups(self.me, self.passengers)
+                sendOrders(self, "move", path, pickup)
 
                 return
             
