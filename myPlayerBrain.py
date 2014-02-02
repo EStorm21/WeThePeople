@@ -98,7 +98,7 @@ class MyPlayerBrain(object):
                 if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
                   status == "PASSENGER_PICKED_UP"):
 
-                    if(playerStatus.limo.passenger == self.me.pickup[0]):
+                    if(playerStatus.limo.passenger == self.me.pickup[0] and self.me.limo.coffeeServings > 0):
                         pickup = self.allPickups(self.me, self.passengers)
                         print "Changing targets because someone else picked up ours"
                         print "Now picking up"
@@ -110,12 +110,17 @@ class MyPlayerBrain(object):
                         path = self.calculatePathPlus1(self.me, ptDest)
 
                         sendOrders(self, "move", path, pickup)
+                    else:
+                        print "Gotta get more coffee"
+                        path = self.calculatePathPlus1(self.me, self.findClosestStore())
+                        pickup = self.allPickups(self.me, self.passengers)
+                        sendOrders(self, "move", path, pickup)
                 return
 
             ptDest = None
             pickup = []
             
-            if status == "UPDATE":
+            if (status == "UPDATE" and self.me.limo.coffeeServings > 0):
                 self.maybePlayPowerUp()
                 if(self.me.limo.passenger): #if passenger in limo
                     if(self.enemyAtDestination(self.me.limo.passenger)):
@@ -129,7 +134,8 @@ class MyPlayerBrain(object):
 
                         sendOrders(self, "move", path, pickup)
                 else: #no passenger in limo
-                    print "No passenger in limo."
+                    print "No passenger in limo. Heading for "
+                    print self.me.pickup[0]
 
                 return
             
@@ -293,9 +299,6 @@ class MyPlayerBrain(object):
     
     def allPickups (self, me, passengers):
             # pickup is a list of the possible passengers to pick up.
-            if self.me.limo.coffeeServings == 0:
-                print "getting coffee"
-                return [self.findClosestStore()]
             pickup = [p for p in passengers if (not p in me.passengersDelivered and
                                                 p != me.limo.passenger and
                                                 p.car is None and
