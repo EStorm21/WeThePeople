@@ -12,7 +12,7 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "We, The People 3"
+NAME = "We, The People 0"
 SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
@@ -313,7 +313,7 @@ class MyPlayerBrain(object):
                     if  (10 > abs(player.limo.tilePosition[0] - player.limo.path[-1][0]) > 3) or (10 > abs(player.limo.tilePosition[1] - player.limo.path[-1][1]) > 3):
                         powerUp.player = player
                         playerPowerSend(self, "PLAY", powerUp)
-                        self.powerUpHand.remove(powerUp)
+                        self.powerUpHand2.remove(powerUp)
                         break
 
             else:
