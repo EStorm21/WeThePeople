@@ -59,6 +59,7 @@ class MyPlayerBrain(object):
         self.stores = stores
         self.powerUpDeck = powerUpDeck
         self.powerUpHand = []
+        self.powerUpHand2 = []
         self.myPassenger = None
         self.MAX_TRIPS_BEFORE_REFILL = 3
 
@@ -115,7 +116,7 @@ class MyPlayerBrain(object):
                         sendOrders(self, "move", path, pickup)
                     else:
                         print "Gotta get more coffee"
-                        path = self.calculatePathPlus1(self.me, self.findClosestStore())
+                        path = self.calculatePathPlus1(self.me, self.findClosestStore().busStop)
                         pickup = self.allPickups(self.me, self.passengers)
                         sendOrders(self, "move", path, pickup)
                 return
@@ -141,7 +142,7 @@ class MyPlayerBrain(object):
                     print self.me.pickup[0]
             else:
                 print "Gotta get more coffee"
-                path = self.calculatePathPlus1(self.me, self.findClosestStore())
+                path = self.calculatePathPlus1(self.me, self.findClosestStore().busStop)
                 pickup = self.allPickups(self.me, self.passengers)
                 sendOrders(self, "move", path, pickup)
 
