@@ -12,8 +12,8 @@ import traceback
 import simpleAStar
 from framework import sendOrders, playerPowerSend
 
-NAME = "Guido van Rossum"
-SCHOOL = "Windward U."
+NAME = "We, The People 0"
+SCHOOL = "Harvey Mudd College"
 
 class MyPlayerBrain(object):
     """The Python AI class.  This class must have the methods setup and gameStatus."""
@@ -59,6 +59,7 @@ class MyPlayerBrain(object):
         self.stores = stores
         self.powerUpDeck = powerUpDeck
         self.powerUpHand = []
+        self.powerUpHand2 = []
         self.myPassenger = None
         self.MAX_TRIPS_BEFORE_REFILL = 3
 
@@ -68,6 +69,10 @@ class MyPlayerBrain(object):
 
         path = self.calculatePathPlus1(me, pickup[0].lobby.busStop)
         sendOrders(self, "ready", path, pickup)
+
+    def setOkToPlay(self):
+        for p in self.powerUpHand2:
+            p.okToPlay = True
 
     def gameStatus(self, status, playerStatus):
         """
@@ -94,55 +99,105 @@ class MyPlayerBrain(object):
             # the Player you are updating (particularly to determine what tile
             # to start your path from).
             if playerStatus != self.me:
+                if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
+                  status == "PASSENGER_PICKED_UP"):
+
+                    if(playerStatus.limo.passenger == self.me.pickup[0] and self.me.limo.coffeeServings > 0):
+                        pickup = self.allPickups(self.me, self.passengers)
+                        print "Changing targets because someone else picked up ours"
+                        print "Now picking up"
+                        print pickup[0]
+                        ptDest = pickup[0].lobby.busStop
+                        self.displayOrders(ptDest)
+            
+                        # get the path from where we are to the dest.
+                        path = self.calculatePathPlus1(self.me, ptDest)
+
+                        sendOrders(self, "move", path, pickup)
+                    elif (self.me.limo.coffeeServings <= 0):
+                        print "Gotta get more coffee"
+                        path = self.calculatePathPlus1(self.me, self.findClosestStore().busStop)
+                        pickup = self.allPickups(self.me, self.passengers)
+                        sendOrders(self, "move", path, pickup)
                 return
 
             ptDest = None
             pickup = []
             
-            if status == "UPDATE":
+            if (status == "UPDATE" and self.me.limo.coffeeServings > 0):
                 self.maybePlayPowerUp()
+                if(self.me.limo.passenger): #if passenger in limo
+                    if(self.enemyAtDestination(self.me.limo.passenger)):
+                        print "enemy deposited at destination, changing passenger"
+                        pickup = self.allPickups(self.me, self.passengers)
+                        ptDest = pickup[0].lobby.busStop
+                        self.displayOrders(ptDest)
+            
+                        # get the path from where we are to the dest.
+                        path = self.calculatePathPlus1(self.me, ptDest)
+
+                        sendOrders(self, "move", path, pickup)
+                elif (self.me.limo.coffeeServings <= 0): #no passenger in limo
+                    print "No passenger in limo. Heading for "
+                    print self.me.pickup[0]
+            elif (self.me.limo.coffeeServings <= 0):
+                print "Gotta get more coffee"
+                path = self.calculatePathPlus1(self.me, self.findClosestStore().busStop)
+                pickup = self.allPickups(self.me, self.passengers)
+                sendOrders(self, "move", path, pickup)
+
                 return
             
             self.displayStatus(status, playerStatus)
             
+            print "status:"
+            print status
             
             if (status == "PASSENGER_NO_ACTION" or status == "NO_PATH"):
                 if self.me.limo.passenger is None:
                     pickup = self.allPickups(self.me, self.passengers)
                     ptDest = pickup[0].lobby.busStop
+                    print "Now picking up"
+                    print pickup[0]
                 else:
                     ptDest = self.me.limo.passenger.destination.busStop
             elif (status == "PASSENGER_DELIVERED" or
                   status == "PASSENGER_ABANDONED"):
                 pickup = self.allPickups(self.me, self.passengers)
                 ptDest = pickup[0].lobby.busStop
+                self.setOkToPlay()
             elif  status == "PASSENGER_REFUSED_ENEMY":
-                ptDest = rand.choice(filter(lambda c: c != self.me.limo.passenger.destination,
-                    self.companies)).busStop
+                pickup = self.allPickups(self.me, self.passengers)
+                ptDest = pickup[0].lobby.busStop
+                self.setOkToPlay()
             elif (status == "PASSENGER_DELIVERED_AND_PICKED_UP" or
                   status == "PASSENGER_PICKED_UP"):
                 pickup = self.allPickups(self.me, self.passengers)
                 ptDest = self.me.limo.passenger.destination.busStop
+                self.setOkToPlay()
                 
             # coffee store override
             if(status == "PASSENGER_DELIVERED_AND_PICKED_UP" or status == "PASSENGER_DELIVERED" or status == "PASSENGER_ABANDONED"):
                 if(self.me.limo.coffeeServings <= 0):
-                    ptDest = rand.choice(self.stores).busStop
+                    ptDest = self.findClosestStore().busStop
+                self.setOkToPlay()
             elif(status == "PASSENGER_REFUSED_NO_COFFEE" or status == "PASSENGER_DELIVERED_AND_PICK_UP_REFUSED"):
-                ptDest = rand.choice(self.stores).busStop
+                ptDest = self.findClosestStore().busStop
+                self.setOkToPlay()
             elif(status == "COFFEE_STORE_CAR_RESTOCKED"):
                 pickup = self.allPickups(self.me, self.passengers)
                 if len(pickup) != 0:
                     ptDest = pickup[0].lobby.busStop
+                self.setOkToPlay()
             
             if(ptDest == None):
+
                 return
             
             self.displayOrders(ptDest)
             
             # get the path from where we are to the dest.
             path = self.calculatePathPlus1(self.me, ptDest)
-
             sendOrders(self, "move", path, pickup)
         except Exception as e:
             print traceback.format_exc()
@@ -181,42 +236,88 @@ class MyPlayerBrain(object):
             path.append(path[-2])
         return path
     
+    def checkForRaces():
+        playersWithoutPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is None, self.players)
+        if (self.me.limo.passenger == None):
+            for player in playersWithoutPassengers:
+                if (player.limo.path[-1] == self.me.limo.path[-1]):
+                    return player
+        return None
+
     def maybePlayPowerUp(self):
-        if len(self.powerUpHand) is not 0 and rand.randint(0, 50) < 30:
-            return
+        
         # not enough, draw
-        if len(self.powerUpHand) < self.me.maxCardsInHand and len(self.powerUpDeck) > 0:
+        if len(self.powerUpHand2) < self.me.maxCardsInHand and len(self.powerUpDeck) > 0:
             for card in self.powerUpDeck:
-                if(len(self.powerUpHand) == self.me.maxCardsInHand):
+                if(len(self.powerUpHand2) >= self.me.maxCardsInHand):
                     break
                 # select a card
                 self.powerUpDeck.remove(card)
-                self.powerUpHand.append(card)
+                self.powerUpHand2.append(card)
                 playerPowerSend(self, "DRAW", card)
-            return
-        
+            #return
+        print "Length of hand", len(self.powerUpHand2)
+        print "Max length", self.me.maxCardsInHand
+
         # can we play one?
-        okToPlayHand = filter(lambda p: p.okToPlay, self.powerUpHand)
+        okToPlayHand = filter(lambda p: p.okToPlay, self.powerUpHand2)
+        print "Ok to play len", len(okToPlayHand)
         if len(okToPlayHand) == 0:
             return
-        powerUp = okToPlayHand[0]
-        
-        # 10% discard, 90% play
-        if rand.randint(1, 10) == 1:
-            playerPowerSend(self, "DISCARD", powerUp)
-        else:
-            if powerUp.card == "MOVE_PASSENGER":
-                powerUp.passenger = rand.choice(filter(lambda p: p.car is None, self.passengers))
-            if powerUp.card == "CHANGE_DESTINATION" or powerUp.card == "STOP_CAR":
-                playersWithPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is not None, self.players)
-                if len(playersWithPassengers) == 0:
-                    return
-                powerUp.player = rand.choice(playersWithPassengers)
 
-            playerPowerSend(self, "PLAY", powerUp)
-            print "Playing powerup " + powerUp.card
-        self.powerUpHand.remove(powerUp)
-        
+        for powerUp in okToPlayHand:
+            print "Looking at powerUp ", powerUp.card
+            if powerUp.card == "ALL_OTHER_CARS_QUARTER_SPEED":
+                playerPowerSend(self, "PLAY", powerUp)
+                self.powerUpHand2.remove(powerUp)
+
+            elif powerUp.card == "MOVE_PASSENGER":
+                currPassenger = self.me.limo.passenger
+                if currPassenger != None:
+                    # Could try waiting until right before we arrive at destination to use
+                    # Although if there are multiple enemies, could stop us from getting rid
+                    # of all of them
+                    for e in currPassenger.enemies:
+                        if e.lobby == currPassenger.destination:
+                            powerUp.passenger = e
+                            playerPowerSend(self, "PLAY", powerUp)
+                            self.powerUpHand2.remove(powerUp)
+                            break
+            elif powerUp.card == "STOP_CAR":
+                # Check for races:
+                playersWithoutPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is None, self.players)
+                racingPlayer = checkForRaces()
+                if racingPlayer != None:
+                    powerUp.player = racingPlayer
+                    print "stopping", racingPlayer, " their destination:", racingPlayer.limo.path[-1], "our dest", self.limo.path[-1]
+                   
+                # Stop best player if we have not found a race
+                else:
+                    bestScore = 0
+                    for player in self.players:
+                        if player.totalScore > bestScore:
+                            bestScore = player.totalScore
+                            bestPlayer = player
+                    powerUp.player = bestPlayer
+
+                playerPowerSend(self, "PLAY", powerUp)
+                self.powerUpHand2.remove(powerUp)
+
+            elif powerUp.card == "CHANGE_DESTINATION":
+                playersWithPassengers = filter(lambda p: p.guid != self.me.guid and p.limo.passenger is not None, self.players)
+                for player in playersWithPassengers:
+                    # If a player is between 3 and 10 spaces away from destination
+                    if  (10 > abs(player.limo.tilePosition[0] - player.limo.path[-1][0]) > 3) or (10 > abs(player.limo.tilePosition[1] - player.limo.path[-1][1]) > 3):
+                        powerUp.player = player
+                        playerPowerSend(self, "PLAY", powerUp)
+                        self.powerUpHand.remove(powerUp)
+                        break
+
+            else:
+                playerPowerSend(self, "DISCARD", powerUp)
+                self.powerUpHand2.remove(powerUp)
+            #playerPowerSend(self, "PLAY", powerUp)
+            
         return
     
     # A power-up was played. It may be an error message, or success.
@@ -258,9 +359,51 @@ class MyPlayerBrain(object):
         return
     
     def allPickups (self, me, passengers):
+            # pickup is a list of the possible passengers to pick up.
             pickup = [p for p in passengers if (not p in me.passengersDelivered and
                                                 p != me.limo.passenger and
                                                 p.car is None and
-                                                p.lobby is not None and p.destination is not None)]
+                                                p.lobby is not None and p.destination is not None and
+                                                not any(i for i in p.enemies if i in p.destination.passengers))]
+            total = 0
+            for passenger in pickup:
+                self.calculateScore(passenger)
+                total += passenger.score
+
             rand.shuffle(pickup)
+            select = rand.random()*total
+            for passenger in pickup:
+                select -= passenger.score
+                if (select <= 0):
+                    pickup.insert(0, pickup.pop(pickup.index(passenger)))
+                    break            
             return pickup
+
+    def calculateScore(self, passenger):
+        pathScore = self.scorePath(simpleAStar.calculatePath(self.gameMap, self.me.limo.tilePosition, passenger.lobby.busStop))
+        pathScore += self.scorePath(simpleAStar.calculatePath(self.gameMap, passenger.lobby.busStop, passenger.destination.busStop))
+        passenger.score = passenger.pointsDelivered/float(pathScore)
+        if self.enemyAtDestination(passenger):
+            passenger.score = 0
+
+    def scorePath(self, path):
+        return len(path)
+
+    def findClosestStore(self):
+        """Finds closest coffee store"""
+        closestStore = self.stores[0]
+        score = self.calculatePathPlus1(self.me, closestStore.busStop)
+        for x in self.stores:
+            newScore = self.calculatePathPlus1(self.me, x.busStop)
+            if newScore < score:
+                score = newScore
+                closestStore = x
+        return closestStore
+
+    def enemyAtDestination(self, passenger):
+        destination = passenger.destination
+        for enemy in passenger.enemies:
+            if destination == enemy.lobby and destination:
+                return True
+        return False
+

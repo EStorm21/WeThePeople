@@ -233,6 +233,7 @@ class Passenger(object):
         self.route = route
         self.enemies = []
         self.car = None
+        self.score = 0
 
     def __repr__(self):
         return self.name
