@@ -399,10 +399,10 @@ class MyPlayerBrain(object):
     def findClosestStore(self):
         """Finds closest coffee store"""
         closestStore = self.stores[0]
-        score = self.calculatePathPlus1(self.me, closestStore.busStop)
+        score = self.scorePath(self.calculatePathPlus1(self.me, closestStore.busStop))
         for x in self.stores:
-            newScore = self.calculatePathPlus1(self.me, x.busStop)
-            if newScore > score:
+            newScore = self.scorePath(self.calculatePathPlus1(self.me, x.busStop))
+            if newScore < score:
                 score = newScore
                 closestStore = x
         return closestStore
